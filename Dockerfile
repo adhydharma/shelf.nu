@@ -1,6 +1,7 @@
 # --- Stage 1: Build Stage ---
 FROM node:22-alpine AS builder
 
+# Install pnpm globally
 RUN npm install -g pnpm
 
 WORKDIR /app
@@ -22,7 +23,6 @@ RUN npm install -g pnpm
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV PORT=5000
 
 # Copy necessary build outputs, packages, and node_modules from builder
 COPY --from=builder /app/node_modules ./node_modules
@@ -32,7 +32,7 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 
-EXPOSE 5000
+EXPOSE 3000
 
 # Start the application
 CMD ["pnpm", "--filter", "webapp", "start"]
