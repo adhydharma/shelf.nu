@@ -6,18 +6,13 @@ RUN npm install -g pnpm
 
 WORKDIR /app
 
-# Copy workspace and lock files first for caching
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+# Copy the entire monorepo workspace
+COPY . .
 
-# Copy necessary monorepo directories (including patches!)
-COPY patches/ ./patches/
-COPY apps/ ./apps/
-COPY packages/ ./packages/
-
-# Install all dependencies using pnpm
+# Install all dependencies with pnpm
 RUN pnpm install --frozen-lockfile
 
-# Build the webapp
+# Build the webapp via Turborepo
 RUN pnpm webapp:build
 
 # --- Stage 2: Production Runtime Stage ---
@@ -29,11 +24,13 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy built artifacts and dependencies from builder
+# Copy necessary build outputs, packages, and node_modules from builder
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/webapp ./apps/webapp
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 
 EXPOSE 3000
 
