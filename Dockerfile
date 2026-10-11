@@ -7,7 +7,7 @@ RUN npm install -g pnpm
 WORKDIR /app
 
 # Copy workspace and lock files first for caching
-package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 
 # Copy necessary monorepo directories (including patches!)
 COPY patches/ ./patches/
@@ -17,7 +17,7 @@ COPY packages/ ./packages/
 # Install all dependencies using pnpm
 RUN pnpm install --frozen-lockfile
 
-# Build the webapp (adjust if your build script differs)
+# Build the webapp
 RUN pnpm webapp:build
 
 # --- Stage 2: Production Runtime Stage ---
